@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#020617">
-    <title>AppOrbit Platinum - Mega Hub</title>
+    <meta name="theme-color" content="#000000">
+    <title>AppOrbit v3 - 13 Games Mega Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -12,143 +12,136 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        :root {
-            --blue-accent: #3b82f6;
-            --bg-dark: #020617;
-        }
-
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             overscroll-behavior: none;
             -webkit-tap-highlight-color: transparent;
-            background-color: #020617;
+            background-color: #000000;
             color: #f8fafc;
         }
 
-        /* View Animations */
-        .view-anim { animation: viewSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        @keyframes viewSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Result Overlays */
+        .lose-bg { background: linear-gradient(to bottom, #450a0a, #000000); }
+        .win-bg { background: linear-gradient(to bottom, #064e3b, #000000); }
 
-        /* Premium 3D Memory Cards */
-        .m-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; perspective: 1000px; width: 100%; max-width: 340px; }
+        /* View Animations */
+        .view-anim { animation: viewIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes viewIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Game Grids */
+        .m-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; perspective: 1000px; }
         .m-card { aspect-ratio: 1/1; position: relative; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
         .m-card.flipped { transform: rotateY(180deg); }
         .m-front, .m-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; }
         .m-front { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #3b82f6; }
         .m-back { background: #3b82f6; color: white; transform: rotateY(180deg); }
 
-        /* 2048 Matrix */
-        .grid-2048 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #1e293b; padding: 10px; border-radius: 16px; width: 100%; max-width: 320px; aspect-ratio: 1/1; }
-        .tile-2048 { width: 100%; height: 100%; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; transition: all 0.1s; }
+        .tile-2048 { width: 100%; height: 100%; background: #1e293b; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; transition: all 0.1s; border: 1px solid rgba(255,255,255,0.05); }
         .tile-2 { background: #334155; color: #94a3b8; }
-        .tile-4 { background: #475569; color: #cbd5e1; }
         .tile-8 { background: #3b82f6; color: white; box-shadow: 0 0 10px rgba(59,130,246,0.5); }
-        .tile-16 { background: #2563eb; color: white; }
-        .tile-32 { background: #8b5cf6; color: white; }
-        .tile-64 { background: #d946ef; color: white; }
-        .tile-128 { background: #f43f5e; color: white; }
+        
+        /* Math Wrong Animation */
+        .shake-wrong { animation: shake 0.4s ease-in-out; border: 2px solid #ef4444 !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
-        /* Mole Game */
-        .mole-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 320px; }
-        .hole { aspect-ratio: 1/1; background: #1e293b; border-radius: 24px; position: relative; overflow: hidden; border: 4px solid #0f172a; }
-        .mole { position: absolute; bottom: -100%; left: 0; width: 100%; height: 100%; display: flex; items: center; justify-content: center; font-size: 2.5rem; transition: bottom 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        .mole.up { bottom: 0; }
-
-        /* Custom UI */
-        .glass-header { background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        canvas { border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); touch-action: none; background: #020617; }
+        .glass-header { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        canvas { border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); touch-action: none; background: #020617; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="dark:bg-slate-950 select-none">
+<body class="select-none">
 
-    <!-- SPLASH -->
-    <div id="splash" class="fixed inset-0 z-[1000] bg-[#020617] flex flex-col items-center justify-center transition-opacity duration-700">
+    <!-- SPLASH SCREEN -->
+    <div id="splash" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center transition-opacity duration-700">
         <div class="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-pulse">
             <i class="fas fa-play text-white text-3xl"></i>
         </div>
-        <h1 class="text-3xl font-black mt-8 tracking-tighter text-white">AppOrbit</h1>
-        <p class="text-[10px] text-blue-500 font-bold tracking-[0.4em] mt-2 uppercase">Platinum Mega Hub</p>
+        <h1 class="text-3xl font-black mt-8 tracking-tighter text-white">AppOrbit Platinum</h1>
+        <p class="text-[10px] text-blue-500 font-bold tracking-[0.4em] mt-2 uppercase">Ultimate v3.0 • 13 Games</p>
     </div>
 
-    <!-- WIN DIALOG -->
-    <div id="win-overlay" class="fixed inset-0 bg-slate-950/90 z-[2000] hidden items-center justify-center p-6 backdrop-blur-xl">
-        <div class="bg-slate-900 rounded-[3rem] p-10 text-center shadow-2xl max-w-xs w-full view-anim border border-slate-800">
-            <div class="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                <i class="fas fa-trophy text-4xl text-white"></i>
+    <!-- GLOBAL RESULT OVERLAY (WIN/LOSE) -->
+    <div id="result-overlay" class="fixed inset-0 z-[2000] hidden items-center justify-center p-6 backdrop-blur-2xl">
+        <div id="result-card" class="rounded-[3.5rem] p-10 text-center shadow-2xl max-w-xs w-full view-anim border border-white/10">
+            <div id="result-icon-box" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <i id="result-icon" class="fas text-4xl text-white"></i>
             </div>
-            <h2 class="text-3xl font-black mb-2 text-white">Victory!</h2>
-            <p id="win-msg" class="text-slate-400 text-sm mb-8"></p>
+            <h2 id="result-title" class="text-3xl font-black mb-2 text-white uppercase tracking-tight"></h2>
+            <p id="result-msg" class="text-white/60 text-sm mb-10 font-medium"></p>
             <div class="space-y-3">
-                <button id="win-restart-btn" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all">REPLAY MISSION</button>
-                <button onclick="closeWin()" class="w-full bg-slate-800 text-slate-400 font-bold py-4 rounded-2xl">BACK TO HUB</button>
+                <button id="res-btn-retry" class="w-full bg-white text-black font-black py-4 rounded-3xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs">Phirse Koshish</button>
+                <button onclick="closeResult()" class="w-full bg-white/10 text-white font-bold py-4 rounded-3xl active:scale-95 transition-all text-xs uppercase">Hub Pe Wapas</button>
             </div>
         </div>
     </div>
 
-    <!-- APP SHELL -->
-    <div id="app-shell" class="hidden flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 shadow-2xl relative overflow-hidden">
+    <!-- MAIN APP SHELL -->
+    <div id="app-shell" class="hidden flex flex-col min-h-screen max-w-md mx-auto bg-black shadow-2xl relative overflow-hidden">
         
         <header id="main-header" class="sticky top-0 z-50 p-5 glass-header">
             <div class="flex justify-between items-center mb-5">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg rotate-3">
-                        <i class="fas fa-bolt text-white text-xs"></i>
+                        <i class="fas fa-gamepad text-white text-xs"></i>
                     </div>
                     <div>
-                        <h1 class="text-lg font-black tracking-tight">AppOrbit</h1>
-                        <p class="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Mega Edition</p>
+                        <h1 class="text-lg font-black tracking-tight text-white">AppOrbit</h1>
+                        <p class="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Mega Ultimate Hub</p>
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-blue-400 border border-slate-800">
+                <div class="flex gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-blue-500 border border-white/10">
                         <i class="fas fa-crown text-[10px]"></i>
                     </div>
                 </div>
             </div>
             <div class="relative">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                <input oninput="handleSearch(this.value)" type="text" placeholder="Khojiye behtareen games..." class="w-full bg-slate-900/50 py-3.5 pl-11 pr-4 rounded-2xl text-sm outline-none border border-slate-800 focus:border-blue-500/30 transition-all text-white">
+                <input oninput="handleSearch(this.value)" type="text" placeholder="Behtareen games khojiye..." class="w-full bg-white/5 py-3.5 pl-11 pr-4 rounded-2xl text-sm outline-none border border-white/10 focus:border-blue-500/30 transition-all text-white">
             </div>
         </header>
 
         <main id="view-container" class="flex-1 overflow-y-auto p-5 pb-32 no-scrollbar">
-            <!-- Content -->
+            <!-- Dynamic Content -->
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#020617]/95 backdrop-blur-xl border-t border-slate-900 flex justify-around py-5 z-50 rounded-t-[40px] shadow-2xl">
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/95 backdrop-blur-xl border-t border-white/5 flex justify-around py-5 z-50 rounded-t-[40px] shadow-2xl">
             <button onclick="showView('home')" id="nav-home" class="nav-item flex flex-col items-center gap-1 opacity-40 transition-all">
                 <i class="fas fa-compass text-xl"></i>
-                <span class="text-[9px] font-bold uppercase tracking-widest">Explore</span>
+                <span class="text-[9px] font-bold uppercase tracking-widest">Hub</span>
             </button>
             <button onclick="showView('games')" id="nav-games" class="nav-item flex flex-col items-center gap-1 opacity-40 transition-all">
-                <i class="fas fa-gamepad text-xl"></i>
+                <i class="fas fa-cubes text-xl"></i>
                 <span class="text-[9px] font-bold uppercase tracking-widest">Arcade</span>
             </button>
             <button onclick="showView('profile')" id="nav-profile" class="nav-item flex flex-col items-center gap-1 opacity-40 transition-all">
                 <i class="fas fa-user-ninja text-xl"></i>
-                <span class="text-[9px] font-bold uppercase tracking-widest">Profile</span>
+                <span class="text-[9px] font-bold uppercase tracking-widest">Me</span>
             </button>
         </nav>
     </div>
 
     <script>
-        // --- GAME DATABASE ---
+        // --- 13 GAMES DATABASE ---
         const GAMES_DB = [
-            { id: 'g_mem', name: 'Memory Match Pro', dev: 'BrainOrbit', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png', key: 'memory', size: '1.8 MB' },
-            { id: 'g_2048', name: '2048 Platinum', dev: 'LogicOrbit', cat: 'Logic', icon: 'https://cdn-icons-png.flaticon.com/512/3504/3504104.png', key: '2048', size: '1.2 MB' },
-            { id: 'g_math', name: 'Math Duel Speed', dev: 'BrainOrbit', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/2312/2312677.png', key: 'math', size: '0.8 MB' },
-            { id: 'g_mole', name: 'Whack-A-Mole Pro', dev: 'ActionOrbit', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/2619/2619077.png', key: 'mole', size: '1.0 MB' },
-            { id: 'g_snake', name: 'Neon Snake High', dev: 'RetroOrbit', cat: 'Arcade', icon: 'https://cdn-icons-png.flaticon.com/512/528/528105.png', key: 'snake', size: '1.4 MB' },
-            { id: 'g_color', name: 'Color Reflex', dev: 'BrainOrbit', cat: 'Mind', icon: 'https://cdn-icons-png.flaticon.com/512/3552/3552011.png', key: 'color', size: '0.7 MB' },
-            { id: 'g_catch', name: 'Gems Catch Ultra', dev: 'ActionOrbit', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/658/658237.png', key: 'catch', size: '1.1 MB' },
-            { id: 'g_ttt', name: 'Tic Tac Toe Duo', dev: 'Orbit Local', cat: 'Board', icon: 'https://cdn-icons-png.flaticon.com/512/566/566294.png', key: 'ttt', size: '0.5 MB' }
+            { id: 'g_mem', name: 'Memory Match Pro', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png', key: 'memory', size: '1.8 MB' },
+            { id: 'g_2048', name: '2048 Platinum', cat: 'Logic', icon: 'https://cdn-icons-png.flaticon.com/512/3504/3504104.png', key: '2048', size: '1.2 MB' },
+            { id: 'g_math', name: 'Math Speed Duel', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/2312/2312677.png', key: 'math', size: '0.8 MB' },
+            { id: 'g_mole', name: 'Whack-A-Mole', cat: 'Reflex', icon: 'https://cdn-icons-png.flaticon.com/512/2619/2619077.png', key: 'mole', size: '1.0 MB' },
+            { id: 'g_snake', name: 'Neon Snake High', cat: 'Arcade', icon: 'https://cdn-icons-png.flaticon.com/512/528/528105.png', key: 'snake', size: '1.4 MB' },
+            { id: 'g_color', name: 'Color Reflex', cat: 'Mind', icon: 'https://cdn-icons-png.flaticon.com/512/3552/3552011.png', key: 'color', size: '0.7 MB' },
+            { id: 'g_catch', name: 'Gems Catch Ultra', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/658/658237.png', key: 'catch', size: '1.1 MB' },
+            { id: 'g_ttt', name: 'Tic Tac Toe Duo', cat: 'Board', icon: 'https://cdn-icons-png.flaticon.com/512/566/566294.png', key: 'ttt', size: '0.5 MB' },
+            { id: 'g_emoji', name: 'Emoji Pop Speed', cat: 'Reflex', icon: 'https://cdn-icons-png.flaticon.com/512/4272/4272841.png', key: 'emoji', size: '0.9 MB' },
+            { id: 'g_tap', name: 'Fast Tap Speed', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/2618/2618245.png', key: 'tap', size: '0.4 MB' },
+            { id: 'g_space', name: 'Space Dodge Pro', cat: 'Arcade', icon: 'https://cdn-icons-png.flaticon.com/512/1356/1356479.png', key: 'space', size: '1.3 MB' },
+            { id: 'g_simon', name: 'Simon Sequence', cat: 'Memory', icon: 'https://cdn-icons-png.flaticon.com/512/3399/3399127.png', key: 'simon', size: '0.6 MB' },
+            { id: 'g_num', name: 'Number Slider', cat: 'Puzzle', icon: 'https://cdn-icons-png.flaticon.com/512/566/566445.png', key: 'number', size: '0.5 MB' }
         ];
 
-        let highScores = JSON.parse(localStorage.getItem('orbit_mega_scores')) || { memory:0, '2048':0, math:0, mole:0, snake:0, catch:0, color:0 };
-        let feedbacks = JSON.parse(localStorage.getItem('orbit_mega_feedback')) || [];
-        let isGameActive = false;
-        let activeKey = '';
+        let scores = JSON.parse(localStorage.getItem('orbit_v3_scores')) || {};
+        let isGameOn = false;
+        let currentKey = '';
 
         window.onload = () => {
             setTimeout(() => {
@@ -163,45 +156,40 @@
 
         function showView(view) {
             const container = document.getElementById('view-container');
-            const header = document.getElementById('main-header');
-            isGameActive = false;
+            isGameOn = false;
             
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('opacity-100', 'text-blue-500'));
             const activeNav = document.getElementById('nav-' + (['home','games','profile'].includes(view) ? view : ''));
             if(activeNav) activeNav.classList.add('opacity-100', 'text-blue-500');
 
-            header.style.display = (['play','launcher','feedback'].includes(view)) ? 'none' : 'block';
             container.innerHTML = '';
-
             if (view === 'home') renderHome();
             else if (view === 'games') renderGames();
             else if (view === 'profile') renderProfile();
-            else if (view === 'feedback') renderFeedback();
         }
 
-        function renderHome(list = GAMES_DB) {
+        function renderHome() {
             const container = document.getElementById('view-container');
             container.innerHTML = `
-                <div class="view-anim space-y-8">
-                    <!-- Premium Hero -->
-                    <div onclick="openLauncher('g_mem')" class="h-52 bg-gradient-to-br from-blue-600 to-indigo-900 rounded-[3rem] p-8 text-white relative overflow-hidden shadow-2xl cursor-pointer group">
+                <div class="view-anim space-y-8 pb-10">
+                    <div onclick="openLauncher('g_mem')" class="h-48 bg-gradient-to-br from-blue-600 to-indigo-900 rounded-[3rem] p-8 text-white relative overflow-hidden shadow-2xl cursor-pointer group">
                         <div class="z-10 relative">
-                            <span class="bg-white/10 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20">Featured Training</span>
-                            <h2 class="text-3xl font-black mt-4 leading-none">Memory Match<br>Pro</h2>
-                            <button class="mt-6 bg-white text-blue-600 text-[10px] font-black px-8 py-3 rounded-2xl shadow-xl">LAUNCH SESSION</button>
+                            <span class="bg-white/10 px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-white/20">Featured Update</span>
+                            <h2 class="text-3xl font-black mt-4 leading-none">Memory Match<br>Platinum</h2>
+                            <button class="mt-6 bg-white text-blue-600 text-[10px] font-black px-8 py-3 rounded-2xl">START MISSION</button>
                         </div>
                         <i class="fas fa-brain absolute -right-8 -bottom-8 text-white/10 text-[200px] rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between items-center mb-6 px-2">
-                            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">Premium Arcade</h3>
-                            <button class="text-blue-500 text-[10px] font-black uppercase">Refresh Hub</button>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center px-2">
+                            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">All Mission Files</h3>
+                            <p class="text-[10px] font-black text-blue-500 uppercase">13 Games Active</p>
                         </div>
-                        <div class="space-y-4">
-                            ${list.map(app => `
-                                <div onclick="openLauncher('${app.id}')" class="flex items-center gap-5 p-4 bg-slate-900 rounded-[2.5rem] shadow-sm active:scale-95 transition-all border border-slate-800">
-                                    <img src="${app.icon}" class="w-14 h-14 rounded-2xl shadow-md border border-slate-700">
+                        <div class="grid grid-cols-1 gap-4">
+                            ${GAMES_DB.map(app => `
+                                <div onclick="openLauncher('${app.id}')" class="flex items-center gap-5 p-4 bg-white/5 rounded-[2.5rem] shadow-sm active:scale-95 transition-all border border-white/5">
+                                    <img src="${app.icon}" class="w-14 h-14 rounded-2xl shadow-md border border-white/10 bg-black/40">
                                     <div class="flex-1">
                                         <h4 class="font-bold text-sm text-white">${app.name}</h4>
                                         <p class="text-[10px] font-bold text-slate-500 mt-0.5 uppercase tracking-tighter">${app.cat} • ${app.size}</p>
@@ -217,313 +205,416 @@
         function openLauncher(id) {
             const app = GAMES_DB.find(a => a.id === id);
             const container = document.getElementById('view-container');
-            const score = highScores[app.key] || 0;
-            activeKey = app.key;
-
+            currentKey = app.key;
             container.innerHTML = `
                 <div class="view-anim min-h-[85vh] flex flex-col items-center justify-center px-5">
-                    <div class="bg-slate-900 rounded-[3.5rem] p-10 text-center shadow-2xl border border-slate-800 w-full relative">
+                    <div class="bg-white/5 rounded-[3.5rem] p-10 text-center shadow-2xl border border-white/10 w-full relative">
                         <button onclick="showView('home')" class="absolute top-10 left-10 text-slate-500"><i class="fas fa-chevron-left text-xl"></i></button>
-                        <div class="w-28 h-28 mx-auto mb-10 bg-white/5 rounded-[2.5rem] p-4 shadow-xl border border-white/10">
-                            <img src="${app.icon}" class="w-full h-full object-contain">
-                        </div>
+                        <img src="${app.icon}" class="w-28 h-28 mx-auto mb-10 bg-white/5 rounded-[2.5rem] p-4 shadow-xl border border-white/10">
                         <h2 class="text-3xl font-black text-white">${app.name}</h2>
-                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mt-3">Platinum Experience</p>
-                        
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mt-3">Ready to Launch</p>
                         <div class="flex gap-4 mt-12 mb-12">
-                            <div class="flex-1 bg-slate-950 p-4 rounded-3xl border border-slate-800">
-                                <p class="text-[8px] font-black text-slate-500 uppercase">Best Record</p>
-                                <p class="text-lg font-black text-white mt-1">${score}</p>
+                            <div class="flex-1 bg-black p-4 rounded-3xl border border-white/5">
+                                <p class="text-[8px] font-black text-slate-500 uppercase">Best Score</p>
+                                <p class="text-lg font-black text-white mt-1">${scores[app.key] || 0}</p>
                             </div>
-                            <div class="flex-1 bg-slate-950 p-4 rounded-3xl border border-slate-800">
-                                <p class="text-[8px] font-black text-slate-500 uppercase">System</p>
-                                <p class="text-lg font-black text-blue-500 mt-1 uppercase">Ready</p>
+                            <div class="flex-1 bg-black p-4 rounded-3xl border border-white/5">
+                                <p class="text-[8px] font-black text-slate-500 uppercase">Level</p>
+                                <p class="text-lg font-black text-blue-500 mt-1 uppercase">MAX</p>
                             </div>
                         </div>
-
-                        <button onclick="startGame('${app.key}')" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all tracking-[0.2em] text-sm uppercase">
-                            LAUNCH MISSION
-                        </button>
+                        <button onclick="startGame('${app.key}')" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all tracking-[0.2em] text-xs uppercase">START MISSION</button>
                     </div>
                 </div>`;
         }
 
+        // --- RESULT LOGIC (WIN vs LOSE) ---
+        function showResult(score, isWin, msg) {
+            isGameOn = false;
+            const overlay = document.getElementById('result-overlay');
+            const card = document.getElementById('result-card');
+            const iconBox = document.getElementById('result-icon-box');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const message = document.getElementById('result-msg');
+            const retryBtn = document.getElementById('res-btn-retry');
+
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            if (isWin) {
+                card.className = "rounded-[3.5rem] p-10 text-center shadow-2xl max-w-xs w-full view-anim border border-white/10 win-bg";
+                iconBox.className = "w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl";
+                icon.className = "fas fa-trophy text-4xl text-white";
+                title.innerText = "Jeet Gaye!";
+            } else {
+                card.className = "rounded-[3.5rem] p-10 text-center shadow-2xl max-w-xs w-full view-anim border border-white/10 lose-bg";
+                iconBox.className = "w-24 h-24 bg-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl";
+                icon.className = "fas fa-skull text-4xl text-white";
+                title.innerText = "Har Gaye!";
+            }
+
+            message.innerText = msg + (score !== null ? ` \nScore: ${score}` : "");
+            retryBtn.onclick = () => { closeResult(); startGame(currentKey); };
+
+            if (score > (scores[currentKey] || 0)) {
+                scores[currentKey] = score;
+                localStorage.setItem('orbit_v3_scores', JSON.stringify(scores));
+            }
+        }
+
+        function closeResult() {
+            document.getElementById('result-overlay').classList.add('hidden');
+            document.getElementById('result-overlay').classList.remove('flex');
+            showView('home');
+        }
+
         function startGame(key) {
-            isGameActive = true;
-            if(key === 'memory') initMemory();
+            isGameOn = true;
+            if(key === 'math') initMath();
+            else if(key === 'memory') initMemory();
             else if(key === '2048') init2048();
-            else if(key === 'math') initMath();
             else if(key === 'mole') initMole();
             else if(key === 'snake') initSnake();
             else if(key === 'catch') initCatch();
+            else if(key === 'emoji') initEmoji();
+            else if(key === 'tap') initTap();
+            else if(key === 'space') initSpace();
             else if(key === 'color') initColor();
             else if(key === 'ttt') initTTT();
+            else if(key === 'simon') initSimon();
+            else if(key === 'number') initNumberSlider();
         }
 
-        // --- GAME 1: 3D MEMORY MATCH ---
+        // --- GAME 1: MATH SPEED (3 LIVES) ---
+        function initMath() {
+            let score = 0, lives = 3, q;
+            const container = document.getElementById('view-container');
+            const nextQ = () => {
+                let a = Math.floor(Math.random()*15), b = Math.floor(Math.random()*15);
+                let op = Math.random() > 0.5 ? '+' : '-';
+                q = { txt: `${a} ${op} ${b}`, ans: op==='+'?a+b:a-b };
+                document.getElementById('math-q').innerText = q.txt;
+                let options = [q.ans, q.ans+2, q.ans-2, q.ans+1].sort(()=>Math.random()-0.5);
+                document.getElementById('math-opts').innerHTML = options.map(o => `<button onclick="checkMath(${o}, this)" class="bg-white/10 p-5 rounded-2xl border border-white/5 font-black text-white active:scale-95 transition-all">${o}</button>`).join('');
+            };
+            container.innerHTML = `
+                <div class="view-anim flex flex-col items-center">
+                    <div class="w-full flex justify-between mb-10 bg-white/5 p-4 rounded-3xl border border-white/5">
+                        <button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button>
+                        <div class="flex gap-4">
+                            <p class="text-rose-500 font-black" id="m-lives">❤️❤️❤️</p>
+                            <p class="text-blue-500 font-black" id="m-score">0</p>
+                        </div>
+                    </div>
+                    <div id="math-card" class="bg-white/5 w-full p-16 rounded-[3rem] text-center border border-white/10 mb-10 transition-all">
+                        <h2 id="math-q" class="text-6xl font-black text-white"></h2>
+                    </div>
+                    <div id="math-opts" class="grid grid-cols-2 gap-4 w-full"></div>
+                </div>`;
+            nextQ();
+            window.checkMath = (ans, btn) => {
+                if(!isGameOn) return;
+                if(ans === q.ans) {
+                    score += 10; document.getElementById('m-score').innerText = score; nextQ();
+                } else {
+                    lives--;
+                    document.getElementById('m-lives').innerText = "❤️".repeat(lives) + "🖤".repeat(3-lives);
+                    document.getElementById('math-card').classList.add('shake-wrong');
+                    setTimeout(() => document.getElementById('math-card').classList.remove('shake-wrong'), 400);
+                    if(lives === 0) showResult(score, false, "Khatam! Teeno chances khatam ho gaye.");
+                    else nextQ();
+                }
+            };
+        }
+
+        // --- GAME 2: MEMORY MATCH ---
         function initMemory() {
             const icons = ['🎮','🚀','⭐','🔥','💎','🍎','⚡','🍕']; 
             let deck = [...icons, ...icons].sort(() => Math.random() - 0.5);
-            let first = null, lock = false, matches = 0, moves = 0;
+            let first = null, lock = false, mCount = 0, moves = 0;
             const container = document.getElementById('view-container');
-            container.innerHTML = `<div class="view-anim space-y-8"><div class="flex justify-between items-center bg-slate-900 p-4 rounded-[2rem] border border-slate-800"><button onclick="showView('home')" class="text-slate-500 px-3"><i class="fas fa-times text-lg"></i></button><div class="flex gap-6"><div class="text-center"><p class="text-[8px] font-black text-slate-500 uppercase">Moves</p><p id="m-moves" class="text-sm font-black text-blue-500">0</p></div></div></div><div class="m-grid mx-auto">${deck.map((ic, i) => `<div class="m-card" data-ic="${ic}" id="mc-${i}" onclick="mFlip(${i})"><div class="m-front"><i class="fas fa-question text-blue-500 opacity-20"></i></div><div class="m-back">${ic}</div></div>`).join('')}</div></div>`;
-
-            window.mFlip = (idx) => {
-                if (lock || !isGameActive) return;
-                const card = document.getElementById(`mc-${idx}`);
-                if (card.classList.contains('flipped')) return;
-                card.classList.add('flipped');
-                if (!first) { first = card; } else {
-                    moves++; document.getElementById('m-moves').innerText = moves;
-                    lock = true;
-                    if (first.dataset.ic === card.dataset.ic) {
-                        matches++; first = null; lock = false;
-                        if (matches === icons.length) victory(moves, "Pairs matched!");
+            container.innerHTML = `<div class="view-anim space-y-8"><div class="flex justify-between items-center bg-white/5 p-5 rounded-[2rem] border border-white/5 text-white"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times text-lg"></i></button><p class="text-xs font-black uppercase tracking-widest" id="m-moves">Moves: 0</p></div><div class="m-grid mx-auto">${deck.map((ic, i) => `<div class="m-card" data-ic="${ic}" id="mc-${i}" onclick="mFlip(${i})"><div class="m-front"><i class="fas fa-question opacity-10"></i></div><div class="m-back">${ic}</div></div>`).join('')}</div></div>`;
+            window.mFlip = (i) => {
+                if (lock || !isGameOn) return;
+                const c = document.getElementById(`mc-${i}`);
+                if (c.classList.contains('flipped')) return;
+                c.classList.add('flipped');
+                if (!first) { first = c; } else {
+                    moves++; document.getElementById('m-moves').innerText = "Moves: " + moves; lock = true;
+                    if (first.dataset.ic === c.dataset.ic) {
+                        mCount++; first = null; lock = false;
+                        if (mCount === icons.length) showResult(moves, true, "Memory sharp hai aapki!");
                     } else {
-                        setTimeout(() => { first.classList.remove('flipped'); card.classList.remove('flipped'); first = null; lock = false; }, 800);
+                        setTimeout(() => { first.classList.remove('flipped'); c.classList.remove('flipped'); first = null; lock = false; }, 800);
                     }
                 }
             };
         }
 
-        // --- GAME 2: 2048 PLATINUM ---
+        // --- GAME 3: 2048 PLATINUM ---
         let b2048, sc2048;
         function init2048() {
-            b2048 = Array(4).fill(0).map(()=>Array(4).fill(0)); sc2048 = 0;
-            add2048(); add2048(); render2048();
-        }
-        function add2048() {
-            let e=[]; for(let r=0;r<4;r++)for(let c=0;c<4;c++)if(b2048[r][c]===0)e.push({r,c});
-            if(e.length){ let{r,c}=e[Math.floor(Math.random()*e.length)]; b2048[r][c]=Math.random()<0.9?2:4; }
-        }
-        function render2048() {
-            const container = document.getElementById('view-container');
-            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8 items-center bg-slate-900 p-4 rounded-3xl border border-slate-800"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><p class="text-sm font-black text-blue-500">SCORE: ${sc2048}</p></div><div class="grid-2048" id="g-2048">${b2048.flat().map(v => `<div class="tile-2048 ${v?'tile-'+v:''}"> ${v||''} </div>`).join('')}</div></div>`;
-            setup2048();
-        }
-        function setup2048() {
-            let sX, sY; const g = document.getElementById('g-2048');
-            g.addEventListener('touchstart', e => { sX = e.touches[0].clientX; sY = e.touches[0].clientY; e.preventDefault(); }, {passive: false});
-            g.addEventListener('touchend', e => {
-                let dX = e.changedTouches[0].clientX - sX, dY = e.changedTouches[0].clientY - sY;
-                let old = JSON.stringify(b2048);
-                if(Math.abs(dX)>Math.abs(dY)) { if(dX>30) move2048('R'); else if(dX<-30) move2048('L'); }
-                else { if(dY>30) move2048('D'); else if(dY<-30) move2048('U'); }
-                if(old !== JSON.stringify(b2048)) { add2048(); if(sc2048>highScores['2048']){ highScores['2048']=sc2048; localStorage.setItem('orbit_mega_scores', JSON.stringify(highScores)); } render2048(); }
-            }, {passive: false});
-        }
-        function move2048(dir) {
-            const slide = (row) => {
-                let r = row.filter(v=>v);
-                for(let i=0;i<r.length-1;i++) if(r[i]===r[i+1]){r[i]*=2; sc2048+=r[i]; r.splice(i+1,1);}
-                return r.concat(Array(4-r.length).fill(0));
+            b2048 = Array(4).fill(0).map(()=>Array(4).fill(0)); sc2048=0;
+            const add = () => {
+                let e=[]; for(let r=0;r<4;r++)for(let c=0;c<4;c++)if(b2048[r][c]===0)e.push({r,c});
+                if(e.length){let{r,c}=e[Math.floor(Math.random()*e.length)];b2048[r][c]=Math.random()<0.9?2:4;}
             };
-            if(dir==='L') b2048 = b2048.map(r=>slide(r));
-            if(dir==='R') b2048 = b2048.map(r=>slide(r.reverse()).reverse());
-            if(dir==='U') { b2048=t(b2048); b2048=b2048.map(r=>slide(r)); b2048=t(b2048); }
-            if(dir==='D') { b2048=t(b2048); b2048=b2048.map(r=>slide(r.reverse()).reverse()); b2048=t(b2048); }
-        }
-        function t(b){ return b[0].map((_,i)=>b.map(r=>r[i])); }
-
-        // --- GAME 3: MATH DUEL SPEED ---
-        function initMath() {
-            let score=0, timer=30, q;
-            const gen = () => {
-                let a=Math.floor(Math.random()*20), b=Math.floor(Math.random()*20), op=Math.random()>0.5?'+':'-';
-                q = { txt: `${a} ${op} ${b}`, ans: op==='+'?a+b:a-b };
-                let options = [q.ans, q.ans+2, q.ans-2, q.ans+5].sort(()=>Math.random()-0.5);
-                document.getElementById('m-q').innerText = q.txt;
-                document.getElementById('m-opts').innerHTML = options.map(o => `<button onclick="checkMath(${o})" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 font-bold text-white active:bg-blue-600">${o}</button>`).join('');
+            const render = () => {
+                const container = document.getElementById('view-container');
+                container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8 p-4 bg-white/5 border border-white/5 rounded-3xl items-center"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><p class="text-blue-500 font-black">SCORE: ${sc2048}</p></div><div id="g2048" class="grid grid-cols-4 gap-3 bg-white/5 p-3 rounded-2xl w-full max-w-[340px] aspect-square">${b2048.flat().map(v=>`<div class="tile-2048 ${v?'tile-'+v:''}"> ${v||''} </div>`).join('')}</div></div>`;
+                let sx, sy; const g = document.getElementById('g2048');
+                g.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
+                g.addEventListener('touchend', e => {
+                    let dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+                    let old = JSON.stringify(b2048);
+                    const sl = (row) => {
+                        let r = row.filter(v=>v);
+                        for(let i=0;i<r.length-1;i++) if(r[i]===r[i+1]){r[i]*=2; sc2048+=r[i]; r.splice(i+1,1);}
+                        return r.concat(Array(4-r.length).fill(0));
+                    };
+                    const t = (b) => b[0].map((_,i)=>b.map(r=>r[i]));
+                    if(Math.abs(dx)>Math.abs(dy)){
+                        if(dx>30) b2048 = b2048.map(r=>sl(r.reverse()).reverse());
+                        else if(dx<-30) b2048 = b2048.map(r=>sl(r));
+                    } else {
+                        if(dy>30) { b2048=t(b2048); b2048=b2048.map(r=>sl(r.reverse()).reverse()); b2048=t(b2048); }
+                        else if(dy<-30) { b2048=t(b2048); b2048=b2048.map(r=>sl(r)); b2048=t(b2048); }
+                    }
+                    if(old !== JSON.stringify(b2048)) { add(); render(); }
+                }, {passive:false});
             };
-            const container = document.getElementById('view-container');
-            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><div class="flex gap-4"><p class="text-blue-500 font-black" id="math-timer">30s</p><p class="text-white font-black" id="math-sc">0</p></div></div><div class="bg-slate-900 w-full p-10 rounded-[3rem] text-center border border-slate-800 mb-8"><h2 id="m-q" class="text-4xl font-black text-white"></h2></div><div class="grid grid-cols-2 gap-4 w-full" id="m-opts"></div></div>`;
-            gen();
-            const interval = setInterval(() => {
-                if(!isGameActive) { clearInterval(interval); return; }
-                timer--; document.getElementById('math-timer').innerText = timer+'s';
-                if(timer<=0) { clearInterval(interval); victory(score, "Calculation Master!"); }
-            }, 1000);
-            window.checkMath = (ans) => {
-                if(ans === q.ans) { score+=10; document.getElementById('math-sc').innerText = score; gen(); }
-                else { timer -= 5; gen(); }
-            };
+            add(); add(); render();
         }
 
-        // --- GAME 4: WHACK-A-MOLE PRO ---
+        // --- GAME 4: WHACK A MOLE ---
         function initMole() {
-            let score=0, activeHole=-1;
+            let score=0, hIdx=-1;
             const container = document.getElementById('view-container');
-            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="mole-sc">0</p></div><div class="mole-grid">${[0,1,2,3,4,5,6,7,8].map(i=>`<div class="hole" onclick="whack(${i})"><div class="mole" id="mole-${i}">🐹</div></div>`).join('')}</div></div>`;
+            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="m-sc">0</p></div><div class="grid grid-cols-3 gap-4 w-full max-w-[320px]">${[0,1,2,3,4,5,6,7,8].map(i=>`<div onclick="whack(${i})" class="aspect-square bg-white/5 rounded-3xl border border-white/10 flex items-center justify-center text-4xl overflow-hidden"><div id="mole-${i}" class="translate-y-20 transition-transform duration-200">🐹</div></div>`).join('')}</div></div>`;
             const loop = setInterval(() => {
-                if(!isGameActive) { clearInterval(loop); return; }
-                document.querySelectorAll('.mole').forEach(m=>m.classList.remove('up'));
-                activeHole = Math.floor(Math.random()*9);
-                const isBomb = Math.random()>0.8;
-                const m = document.getElementById(`mole-${activeHole}`);
+                if(!isGameOn) { clearInterval(loop); return; }
+                document.querySelectorAll('[id^="mole-"]').forEach(m=>m.className="translate-y-20 transition-transform duration-200");
+                hIdx = Math.floor(Math.random()*9);
+                const isBomb = Math.random() > 0.8;
+                const m = document.getElementById(`mole-${hIdx}`);
                 m.innerText = isBomb ? '💣' : '🐹';
-                m.classList.add('up');
+                m.className = "translate-y-0 transition-transform duration-200";
             }, 800);
             window.whack = (i) => {
-                if(i !== activeHole) return;
+                if(i !== hIdx || !isGameOn) return;
                 const m = document.getElementById(`mole-${i}`);
-                if(m.innerText === '💣') { clearInterval(loop); victory(score, "TNT Exploded!"); }
-                else if(m.classList.contains('up')) { score+=10; document.getElementById('mole-sc').innerText=score; m.classList.remove('up'); }
+                if(m.innerText === '💣') { clearInterval(loop); showResult(score, false, "Mole ne bomb phod diya!"); }
+                else { score+=10; document.getElementById('m-sc').innerText = score; m.className = "translate-y-20"; }
             };
         }
 
-        // --- GAME 5: COLOR REFLEX ---
-        function initColor() {
-            let score=0, timer=20, cur;
-            const colors = [
-                {name:'RED', val:'#ef4444'}, {name:'BLUE', val:'#3b82f6'}, 
-                {name:'GREEN', val:'#22c55e'}, {name:'YELLOW', val:'#eab308'}
-            ];
-            const gen = () => {
-                const name = colors[Math.floor(Math.random()*4)];
-                const visual = colors[Math.floor(Math.random()*4)];
-                cur = { name: name.name, visual: visual.val };
-                const display = document.getElementById('c-display');
-                display.innerText = cur.name;
-                display.style.color = cur.visual;
-            };
-            const container = document.getElementById('view-container');
-            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p class="text-blue-500 font-black" id="c-timer">20s</p></div><div class="bg-slate-900 w-full p-16 rounded-[3rem] text-center border border-slate-800 mb-10"><h2 id="c-display" class="text-5xl font-black"></h2><p class="text-[10px] uppercase font-bold text-slate-500 mt-4 tracking-widest">Match Name, Not Color</p></div><div class="grid grid-cols-2 gap-4 w-full">${colors.map(c=>`<button onclick="checkColor('${c.name}')" class="p-6 rounded-2xl font-black text-white" style="background:${c.val}">${c.name}</button>`).join('')}</div></div>`;
-            gen();
-            const interval = setInterval(() => {
-                if(!isGameActive) { clearInterval(interval); return; }
-                timer--; document.getElementById('c-timer').innerText = timer+'s';
-                if(timer<=0) { clearInterval(interval); victory(score, "Mind Refined!"); }
-            }, 1000);
-            window.checkColor = (name) => {
-                if(name === cur.name) { score+=10; gen(); }
-                else { timer-=3; gen(); }
-            };
-        }
-
-        // --- GAME 6: NEON SNAKE ---
+        // --- GAME 5: NEON SNAKE ---
         function initSnake() {
             const container = document.getElementById('view-container');
-            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="s-score">0</p></div><canvas id="s-canvas" width="300" height="300" class="bg-slate-950 border border-slate-800"></canvas><div class="mt-8 grid grid-cols-3 gap-3"><button onclick="sDir('up')" class="col-start-2 w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-up"></i></button><button onclick="sDir('left')" class="col-start-1 row-start-2 w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-left"></i></button><button onclick="sDir('down')" class="col-start-2 row-start-2 w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-down"></i></button><button onclick="sDir('right')" class="col-start-3 row-start-2 w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-right"></i></button></div></div>`;
-            const ctx = document.getElementById('s-canvas').getContext('2d');
+            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="s-sc">0</p></div><canvas id="sc" width="300" height="300" class="border border-white/10"></canvas><div class="mt-8 grid grid-cols-3 gap-3"><button onclick="sd('up')" class="col-start-2 w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-up"></i></button><button onclick="sd('left')" class="col-start-1 row-start-2 w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-left"></i></button><button onclick="sd('down')" class="col-start-2 row-start-2 w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-down"></i></button><button onclick="sd('right')" class="col-start-3 row-start-2 w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-chevron-right"></i></button></div></div>`;
+            const ctx=document.getElementById('sc').getContext('2d');
             let s=[{x:10,y:10}], dx=1, dy=0, f={x:15,y:15}, sc=0;
-            const loop = setInterval(() => {
-                if(!isGameActive) { clearInterval(loop); return; }
-                let h={x:s[0].x+dx,y:s[0].y+dy};
-                if(h.x<0||h.x>=30||h.y<0||h.y>=30||s.some(seg=>seg.x===h.x&&seg.y===h.y)){ clearInterval(loop); victory(sc, "Snake crashed!"); return; }
+            const l = setInterval(() => {
+                if(!isGameOn) { clearInterval(l); return; }
+                let h={x:s[0].x+dx, y:s[0].y+dy};
+                if(h.x<0||h.x>=30||h.y<0||h.y>=30||s.some(seg=>seg.x===h.x&&seg.y===h.y)){ clearInterval(l); showResult(sc, false, "Snake crash ho gaya!"); return; }
                 s.unshift(h);
-                if(h.x===f.x && h.y===f.y){ sc+=10; document.getElementById('s-score').innerText=sc; f={x:Math.floor(Math.random()*30),y:Math.floor(Math.random()*30)}; } else s.pop();
+                if(h.x===f.x && h.y===f.y){ sc+=10; document.getElementById('s-sc').innerText=sc; f={x:Math.floor(Math.random()*30), y:Math.floor(Math.random()*30)}; } else s.pop();
                 ctx.clearRect(0,0,300,300); ctx.fillStyle="#3b82f6"; s.forEach(p=>ctx.fillRect(p.x*10,p.y*10,9,9)); ctx.fillStyle="#f43f5e"; ctx.fillRect(f.x*10,f.y*10,9,9);
             }, 100);
-            window.sDir=(d)=>{if(d==='up'&&dy===0){dx=0;dy=-1}if(d==='down'&&dy===0){dx=0;dy=1}if(d==='left'&&dx===0){dx=-1;dy=0}if(d==='right'&&dx===0){dx=1;dy=0}};
+            window.sd = (d) => { if(d==='up'&&dy===0){dx=0;dy=-1}if(d==='down'&&dy===0){dx=0;dy=1}if(d==='left'&&dx===0){dx=-1;dy=0}if(d==='right'&&dx===0){dx=1;dy=0}};
         }
 
-        // --- GAME 7: GEMS CATCH ---
+        // --- GAME 6: GEMS CATCH ---
         function initCatch() {
             const container = document.getElementById('view-container');
-            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="c-score">0</p></div><canvas id="c-canvas" width="320" height="420"></canvas></div>`;
-            const canvas = document.getElementById('c-canvas'), ctx = canvas.getContext('2d');
+            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="c-sc">0</p></div><canvas id="cc" width="320" height="420" class="border border-white/10"></canvas></div>`;
+            const cvs=document.getElementById('cc'), ctx=cvs.getContext('2d');
             let p={x:130,w:60}, its=[], sc=0;
             const loop = () => {
-                if(!isGameActive) return;
-                ctx.clearRect(0,0,320,420);
-                if(Math.random()<0.04) its.push({x:Math.random()*300,y:0,t:Math.random()>0.2?'💎':'💣'});
+                if(!isGameOn) return;
+                ctx.clearRect(0,0,320,420); if(Math.random()<0.04) its.push({x:Math.random()*300, y:0, t:Math.random()>0.2?'💎':'💣'});
                 its.forEach((it,i)=>{
                     it.y+=4; ctx.font='24px serif'; ctx.fillText(it.t, it.x, it.y);
                     if(it.y>390 && it.x>p.x-10 && it.x<p.x+p.w+10){
-                        if(it.t==='💣'){ isGameActive=false; victory(sc, "BOOM!"); return; }
-                        sc+=10; document.getElementById('c-score').innerText=sc; its.splice(i,1);
+                        if(it.t==='💣'){ isGameOn=false; showResult(sc, false, "Bomb blast!"); return; }
+                        sc+=10; document.getElementById('c-sc').innerText=sc; its.splice(i,1);
                     }
                     if(it.y>420) its.splice(i,1);
                 });
                 ctx.fillStyle='#3b82f6'; ctx.beginPath(); ctx.roundRect(p.x,400,p.w,10,5); ctx.fill();
                 requestAnimationFrame(loop);
             };
-            canvas.ontouchmove=(e)=>{p.x=e.touches[0].clientX-canvas.getBoundingClientRect().left-30;e.preventDefault();};
+            cvs.ontouchmove=(e)=>{p.x=e.touches[0].clientX-cvs.getBoundingClientRect().left-30; e.preventDefault();};
             loop();
         }
 
-        // --- GAME 8: TIC TAC TOE ---
-        function initTTT() {
-            let b=Array(9).fill(null), t='X', container = document.getElementById('view-container');
-            container.innerHTML=`<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p id="t-status" class="font-black text-white uppercase text-xs">Turn: ${t}</p></div><div class="grid grid-cols-3 gap-4 w-full max-w-[320px]">${[0,1,2,3,4,5,6,7,8].map(i=>`<div onclick="tClick(${i},this)" class="bg-slate-900 aspect-square rounded-[2rem] border border-slate-800 flex items-center justify-center text-4xl font-black text-white"></div>`).join('')}</div></div>`;
-            window.tClick=(i,el)=>{
-                if(b[i] || !isGameActive) return; b[i]=t; el.innerText=t; el.style.color=t==='X'?'#3b82f6':'#f43f5e';
-                let wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-                if(wins.some(([a,bc,c])=>b[a]&&b[a]===b[bc]&&b[a]===b[c])) { isGameActive=false; victory(0, t+" Wins!"); return; }
-                if(b.every(v=>v)) { isGameActive=false; victory(0, "Draw Game!"); return; }
-                t=t==='X'?'O':'X'; document.getElementById('t-status').innerText = `Turn: ${t}`;
+        // --- GAME 7: EMOJI POP ---
+        function initEmoji() {
+            let score=0, timeLeft=20;
+            const container = document.getElementById('view-container');
+            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><div class="flex gap-4"><p class="text-blue-500 font-black" id="e-timer">20s</p><p class="text-white font-black" id="e-sc">0</p></div></div><div class="relative w-full h-[400px] bg-white/5 border border-white/10 rounded-[2.5rem] overflow-hidden" id="e-area"></div></div>`;
+            const area = document.getElementById('e-area');
+            const spawn = () => {
+                if(!isGameOn) return;
+                const e = document.createElement('div');
+                e.className = "absolute text-4xl cursor-pointer active:scale-125 transition-transform";
+                e.style.left = Math.random()*80 + 10 + '%';
+                e.style.top = Math.random()*80 + 10 + '%';
+                e.innerText = ['😀','😂','🔥','⭐','💎'][Math.floor(Math.random()*5)];
+                e.onclick = () => { score+=5; document.getElementById('e-sc').innerText = score; e.remove(); spawn(); };
+                area.appendChild(e);
+                setTimeout(() => { if(e.parentNode) e.remove(); spawn(); }, 1500);
+            };
+            spawn(); spawn();
+            const timer = setInterval(() => {
+                if(!isGameOn) { clearInterval(timer); return; }
+                timeLeft--; document.getElementById('e-timer').innerText = timeLeft+'s';
+                if(timeLeft<=0) { clearInterval(timer); showResult(score, true, "Waqt khatam!"); }
+            }, 1000);
+        }
+
+        // --- GAME 8: FAST TAP SPEED ---
+        function initTap() {
+            let taps=0, timeLeft=10, started=false;
+            const container = document.getElementById('view-container');
+            container.innerHTML = `<div class="view-anim flex flex-col items-center justify-center min-h-[70vh]"><div class="text-center mb-10"><h2 class="text-6xl font-black text-white" id="t-count">0</h2><p class="text-blue-500 font-bold uppercase tracking-widest mt-2" id="t-timer">10s</p></div><button id="tap-btn" class="w-48 h-48 bg-blue-600 rounded-full shadow-2xl border-8 border-white/20 flex items-center justify-center active:scale-90 transition-all text-white font-black text-2xl uppercase tracking-widest">TAP!</button><p class="mt-10 text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em]">Start tapping now!</p></div>`;
+            const btn = document.getElementById('tap-btn');
+            btn.onclick = () => {
+                if(!isGameOn) return;
+                if(!started) {
+                    started=true;
+                    const timer = setInterval(() => {
+                        timeLeft--; document.getElementById('t-timer').innerText = timeLeft+'s';
+                        if(timeLeft<=0) { clearInterval(timer); isGameOn=false; showResult(taps, true, "Speedy fingers!"); }
+                    }, 1000);
+                }
+                taps++; document.getElementById('t-count').innerText = taps;
             };
         }
 
-        // --- SYSTEM SHARED ---
-        function victory(s, msg) {
-            if(!isGameActive && document.getElementById('win-overlay').style.display === 'flex') return;
-            isGameActive = false;
-            document.getElementById('win-msg').innerText = msg + (s>0 ? " Score: "+s : "");
-            document.getElementById('win-overlay').style.display = 'flex';
-            document.getElementById('win-restart-btn').onclick = () => { closeWin(); startGame(activeKey); };
+        // --- GAME 9: SPACE DODGE ---
+        function initSpace() {
+            const container = document.getElementById('view-container');
+            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-8"><button onclick="showView('home')" class="text-slate-400"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="sp-sc">0</p></div><canvas id="spc" width="320" height="480"></canvas></div>`;
+            const cvs=document.getElementById('spc'), ctx=cvs.getContext('2d');
+            let ship={x:150, y:400, w:20, h:30}, obs=[], sc=0;
+            const loop = () => {
+                if(!isGameOn) return;
+                ctx.clearRect(0,0,320,480);
+                if(Math.random()<0.05) obs.push({x:Math.random()*300, y:-20, w:30, h:30});
+                obs.forEach((o,i)=>{
+                    o.y += 5; ctx.fillStyle = "#ff4444"; ctx.fillRect(o.x, o.y, o.w, o.h);
+                    if(o.y > 480) { obs.splice(i,1); sc+=1; document.getElementById('sp-sc').innerText = sc; }
+                    if(ship.x < o.x+o.w && ship.x+ship.w > o.x && ship.y < o.y+o.h && ship.y+ship.h > o.y) { isGameOn=false; showResult(sc, false, "Antariksh mein takkar!"); }
+                });
+                ctx.fillStyle = "#3b82f6"; ctx.fillRect(ship.x, ship.y, ship.w, ship.h);
+                requestAnimationFrame(loop);
+            };
+            cvs.ontouchmove = (e) => { ship.x = e.touches[0].clientX - cvs.getBoundingClientRect().left - 10; e.preventDefault(); };
+            loop();
         }
-        function closeWin() { document.getElementById('win-overlay').style.display = 'none'; showView('home'); }
-        function handleSearch(q) { renderHome(GAMES_DB.filter(a => a.name.toLowerCase().includes(q.toLowerCase()))); }
-        function renderGames() { renderHome(); }
 
+        // --- GAME 10: COLOR REFLEX ---
+        function initColor() {
+            let sc=0, time=20, cur;
+            const colors = [{n:'RED',v:'#ef4444'}, {n:'BLUE',v:'#3b82f6'}, {n:'GREEN',v:'#22c55e'}, {n:'YELLOW',v:'#eab308'}];
+            const next = () => {
+                let n=colors[Math.floor(Math.random()*4)], v=colors[Math.floor(Math.random()*4)];
+                cur = { n:n.n, v:v.v };
+                const d = document.getElementById('cd'); d.innerText = cur.n; d.style.color = cur.v;
+            };
+            const container = document.getElementById('view-container');
+            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><p class="text-blue-500 font-black" id="ct">20s</p></div><div class="bg-white/5 w-full py-20 rounded-[3rem] text-center border border-white/10 mb-10"><h2 id="cd" class="text-5xl font-black"></h2></div><div class="grid grid-cols-2 gap-4 w-full">${colors.map(c=>`<button onclick="checkC('${c.n}')" class="p-6 rounded-2xl font-black text-white active:scale-95" style="background:${c.v}">${c.n}</button>`).join('')}</div></div>`;
+            next();
+            const it = setInterval(() => {
+                if(!isGameOn) { clearInterval(it); return; }
+                time--; document.getElementById('ct').innerText = time+'s';
+                if(time<=0) { clearInterval(it); showResult(sc, true, "Dimag tej hai!"); }
+            }, 1000);
+            window.checkC = (n) => { if(n===cur.n) { sc+=10; next(); } else { time-=2; next(); } };
+        }
+
+        // --- GAME 11: TIC TAC TOE ---
+        function initTTT() {
+            let b=Array(9).fill(null), t='X', container=document.getElementById('view-container');
+            container.innerHTML=`<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><p id="ts" class="font-black text-white text-xs uppercase tracking-widest">Turn: ${t}</p></div><div class="grid grid-cols-3 gap-4 w-full max-w-[320px]">${[0,1,2,3,4,5,6,7,8].map(i=>`<div onclick="tC(${i},this)" class="bg-white/5 aspect-square rounded-[2rem] border border-white/10 flex items-center justify-center text-4xl font-black text-white active:bg-white/10"></div>`).join('')}</div></div>`;
+            window.tC=(i,el)=>{
+                if(b[i] || !isGameOn) return; b[i]=t; el.innerText=t; el.style.color=t==='X'?'#3b82f6':'#f43f5e';
+                let wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                if(wins.some(([a,bc,c])=>b[a]&&b[a]===b[bc]&&b[a]===b[c])) { isGameOn=false; showResult(null, true, t+" Winner!"); return; }
+                if(b.every(v=>v)) { isGameOn=false; showResult(null, false, "Draw Match!"); return; }
+                t=t==='X'?'O':'X'; document.getElementById('ts').innerText = `Turn: ${t}`;
+            };
+        }
+
+        // --- GAME 12: SIMON SEQUENCE ---
+        function initSimon() {
+            let seq=[], userSeq=[], score=0;
+            const container = document.getElementById('view-container');
+            container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><p class="text-2xl font-black text-blue-500" id="si-sc">0</p></div><div class="grid grid-cols-2 gap-4 w-full max-w-[320px]">${[0,1,2,3].map(i=>`<div id="s-${i}" onclick="siClick(${i})" class="aspect-square rounded-[2rem] border-4 border-white/5 transition-all opacity-50" style="background:${['#ef4444','#3b82f6','#22c55e','#eab308'][i]}"></div>`).join('')}</div></div>`;
+            const playSeq = () => {
+                let i=0; const it = setInterval(() => {
+                    const b = document.getElementById(`s-${seq[i]}`);
+                    b.classList.remove('opacity-50'); setTimeout(()=>b.classList.add('opacity-50'), 400);
+                    i++; if(i>=seq.length) { clearInterval(it); lock=false; }
+                }, 600);
+            };
+            const nextLevel = () => { seq.push(Math.floor(Math.random()*4)); userSeq=[]; playSeq(); };
+            window.siClick = (i) => {
+                if(!isGameOn) return;
+                const b = document.getElementById(`s-${i}`);
+                b.classList.remove('opacity-50'); setTimeout(()=>b.classList.add('opacity-50'), 200);
+                userSeq.push(i);
+                if(userSeq[userSeq.length-1] !== seq[userSeq.length-1]) { isGameOn=false; showResult(score, false, "Sequence galat hai!"); return; }
+                if(userSeq.length === seq.length) { score++; document.getElementById('si-sc').innerText = score; setTimeout(nextLevel, 1000); }
+            };
+            nextLevel();
+        }
+
+        // --- GAME 13: NUMBER SLIDER ---
+        function initNumberSlider() {
+            let n = [1,2,3,4,5,6,7,8,null].sort(()=>Math.random()-0.5);
+            const render = () => {
+                const container = document.getElementById('view-container');
+                container.innerHTML = `<div class="view-anim flex flex-col items-center"><div class="w-full flex justify-between mb-10"><button onclick="showView('home')" class="text-slate-500"><i class="fas fa-times"></i></button><p class="text-xs font-black text-slate-500 uppercase">Sort them 1-8</p></div><div class="grid grid-cols-3 gap-4 w-full max-w-[320px]">${n.map((v,i)=>`<div onclick="nsMove(${i})" class="aspect-square bg-white/5 rounded-[2rem] border border-white/10 flex items-center justify-center text-3xl font-black text-white ${!v?'opacity-0':''} active:scale-95 transition-all">${v||''}</div>`).join('')}</div></div>`;
+            };
+            window.nsMove = (i) => {
+                let empty = n.indexOf(null);
+                let valid = [i-1, i+1, i-3, i+3].includes(empty);
+                if(valid) { n[empty]=n[i]; n[i]=null; render(); if(JSON.stringify(n)==='[1,2,3,4,5,6,7,8,null]') showResult(null, true, "Puzzle solved!"); }
+            };
+            render();
+        }
+
+        // --- PROFILE ---
         function renderProfile() {
             const container = document.getElementById('view-container');
             container.innerHTML = `
                 <div class="view-anim space-y-6">
-                    <div class="bg-blue-600 rounded-[3.5rem] p-10 text-white shadow-2xl flex flex-col items-center">
-                        <div class="w-24 h-24 rounded-full border-4 border-white/20 mb-4 overflow-hidden bg-white/10">
+                    <div class="bg-blue-600 rounded-[3.5rem] p-10 text-white shadow-2xl flex flex-col items-center border border-white/20">
+                        <div class="w-24 h-24 rounded-full border-4 border-white/30 mb-4 overflow-hidden bg-white/10 shadow-inner">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-full h-full">
                         </div>
                         <h2 class="text-2xl font-black">Platinum Ninja</h2>
-                        <p class="text-[9px] font-black uppercase tracking-widest opacity-60">Global Rank #01</p>
+                        <p class="text-[9px] font-black uppercase tracking-widest opacity-60">Master Rank Verified</p>
                     </div>
-                    <div class="bg-slate-900 rounded-[2.5rem] border border-slate-800 overflow-hidden">
-                        <button onclick="showView('feedback')" class="w-full p-6 flex items-center justify-between hover:bg-slate-800 transition-colors">
-                            <div class="flex items-center gap-4 text-white">
-                                <i class="fas fa-comment-dots text-blue-500"></i>
-                                <span class="font-bold text-sm">Submit Feedback</span>
-                            </div>
-                            <i class="fas fa-chevron-right text-slate-500 text-xs"></i>
-                        </button>
-                    </div>
-                </div>`;
-        }
-
-        function renderFeedback() {
-            const container = document.getElementById('view-container');
-            container.innerHTML = `
-                <div class="view-anim space-y-8">
-                    <button onclick="showView('profile')" class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-500 shadow-lg"><i class="fas fa-arrow-left"></i></button>
-                    <div>
-                        <h2 class="text-3xl font-black text-white">Aapka Feedback</h2>
-                        <p class="text-slate-500 text-sm mt-2">AppOrbit ko hum kaise behtar banayein?</p>
-                    </div>
-                    <div class="space-y-4">
-                        <textarea id="f-msg" placeholder="Message yahan likhien..." class="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 min-h-[150px] outline-none text-white font-bold text-sm"></textarea>
-                        <button onclick="submitFeedback()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all uppercase tracking-widest">SEND MESSAGE</button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">High Score Math</p>
+                            <p class="text-xl font-black text-white mt-1">${scores['math'] || 0}</p>
+                        </div>
+                        <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">High Score 2048</p>
+                            <p class="text-xl font-black text-white mt-1">${scores['2048'] || 0}</p>
+                        </div>
                     </div>
                 </div>`;
         }
 
-        function submitFeedback() {
-            const m = document.getElementById('f-msg').value;
-            if(!m) return toast("Message blank hai!");
-            feedbacks.push({ msg: m, date: new Date().toISOString() });
-            localStorage.setItem('orbit_mega_feedback', JSON.stringify(feedbacks));
-            toast("Shukriya! Feedback mil gaya.");
-            setTimeout(() => showView('profile'), 1500);
-        }
-
-        function toast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
-        }
+        function handleSearch(q) { renderHome(GAMES_DB.filter(a => a.name.toLowerCase().includes(q.toLowerCase()))); }
     </script>
 </body>
 </html>
-
-
 
