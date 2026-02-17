@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -34,11 +33,10 @@
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* --- Game Specific Styles (From App Store) --- */
+        /* --- Game Specific Styles --- */
         .lose-bg { background: linear-gradient(to bottom, #450a0a, #000000); }
         .win-bg { background: linear-gradient(to bottom, #064e3b, #000000); }
         
-        /* Memory Game Grid */
         .m-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; perspective: 1000px; }
         .m-card { aspect-ratio: 1/1; position: relative; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
         .m-card.flipped { transform: rotateY(180deg); }
@@ -46,16 +44,24 @@
         .m-front { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #3b82f6; }
         .m-back { background: #3b82f6; color: white; transform: rotateY(180deg); }
 
-        /* 2048 Styles */
         .tile-2048 { width: 100%; height: 100%; background: #1e293b; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; transition: all 0.1s; border: 1px solid rgba(255,255,255,0.05); }
         .tile-2 { background: #334155; color: #94a3b8; }
         .tile-8 { background: #3b82f6; color: white; box-shadow: 0 0 10px rgba(59,130,246,0.5); }
         
-        /* Animations */
         .shake-wrong { animation: shake 0.4s ease-in-out; border: 2px solid #ef4444 !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         
         canvas { border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); touch-action: none; background: #020617; }
+
+        /* Developer Special Tag */
+        .dev-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* --- Water Sort CSS --- */
+        #water-stage { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+        .bottle { width: 45px; height: 160px; border: 2px solid rgba(255,255,255,0.2); border-radius: 8px 8px 20px 20px; background: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column-reverse; cursor: pointer; position: relative; transition: 0.3s; overflow: hidden; }
+        .bottle.selected { transform: translateY(-15px); border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .liquid { width: 100%; height: 25%; transition: height 0.4s; border-top: 1px solid rgba(255,255,255,0.1); }
+        .w-hud { display: flex; justify-content: space-between; width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 20px; margin-bottom: 20px; }
     </style>
 </head>
 <body class="select-none no-scrollbar min-h-screen">
@@ -116,6 +122,10 @@
                         <p class="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Version 3.1 Dashboard</p>
                     </div>
                 </div>
+                <div class="text-right">
+                    <p class="text-[8px] font-black text-slate-500 uppercase">Developed By</p>
+                    <p class="text-[10px] font-black dev-badge uppercase">Siddiqui Kamal</p>
+                </div>
             </div>
             <div class="relative">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
@@ -123,8 +133,7 @@
             </div>
         </header>
 
-        <main id="view-container" class="flex-1 overflow-y-auto p-5 pb-32 no-scrollbar">
-            </main>
+        <main id="view-container" class="flex-1 overflow-y-auto p-5 pb-32 no-scrollbar"></main>
 
         <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/95 backdrop-blur-xl border-t border-white/5 flex justify-around py-5 z-50 rounded-t-[30px]">
             <button onclick="showView('home')" id="nav-home" class="nav-item flex flex-col items-center gap-1 opacity-40 transition-all">
@@ -162,19 +171,22 @@
         let currentUser = null;
 
         const GAMES_DB = [
-            { id: 'g_mem', name: 'Memory Match Pro', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png', key: 'memory', size: '1.8 MB' },
-            { id: 'g_2048', name: '2048 Platinum', cat: 'Logic', icon: 'https://cdn-icons-png.flaticon.com/512/3504/3504104.png', key: '2048', size: '1.2 MB' },
-            { id: 'g_math', name: 'Math Speed Duel', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/2312/2312677.png', key: 'math', size: '0.8 MB' },
-            { id: 'g_mole', name: 'Whack-A-Mole', cat: 'Reflex', icon: 'https://cdn-icons-png.flaticon.com/512/2619/2619077.png', key: 'mole', size: '1.0 MB' },
-            { id: 'g_snake', name: 'Neon Snake High', cat: 'Arcade', icon: 'https://cdn-icons-png.flaticon.com/512/528/528105.png', key: 'snake', size: '1.4 MB' },
-            { id: 'g_color', name: 'Color Reflex', cat: 'Mind', icon: 'https://cdn-icons-png.flaticon.com/512/3552/3552011.png', key: 'color', size: '0.7 MB' },
-            { id: 'g_catch', name: 'Gems Catch Ultra', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/658/658237.png', key: 'catch', size: '1.1 MB' },
-            { id: 'g_ttt', name: 'Tic Tac Toe Duo', cat: 'Board', icon: 'https://cdn-icons-png.flaticon.com/512/566/566294.png', key: 'ttt', size: '0.5 MB' },
-            { id: 'g_emoji', name: 'Emoji Pop Speed', cat: 'Reflex', icon: 'https://cdn-icons-png.flaticon.com/512/4272/4272841.png', key: 'emoji', size: '0.9 MB' },
-            { id: 'g_tap', name: 'Fast Tap Speed', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/2618/2618245.png', key: 'tap', size: '0.4 MB' },
-            { id: 'g_space', name: 'Space Dodge Pro', cat: 'Arcade', icon: 'https://cdn-icons-png.flaticon.com/512/1356/1356479.png', key: 'space', size: '1.3 MB' },
-            { id: 'g_simon', name: 'Simon Sequence', cat: 'Memory', icon: 'https://cdn-icons-png.flaticon.com/512/3399/3399127.png', key: 'simon', size: '0.6 MB' },
-            { id: 'g_num', name: 'Number Slider', cat: 'Puzzle', icon: 'https://cdn-icons-png.flaticon.com/512/566/566445.png', key: 'number', size: '0.5 MB' }
+            /* --- Naya Game Add Kiya Gaya --- */
+            { id: 'g_water', name: 'Water Sort Elite', cat: 'Puzzle', icon: 'https://cdn-icons-png.flaticon.com/512/3105/3105807.png', key: 'water' },
+            /* --- Purane Saare Games --- */
+            { id: 'g_mem', name: 'Memory Match Pro', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png', key: 'memory' },
+            { id: 'g_2048', name: '2048 Platinum', cat: 'Logic', icon: 'https://cdn-icons-png.flaticon.com/512/3504/3504104.png', key: '2048' },
+            { id: 'g_math', name: 'Math Speed Duel', cat: 'Brain', icon: 'https://cdn-icons-png.flaticon.com/512/2312/2312677.png', key: 'math' },
+            { id: 'g_mole', name: 'Whack-A-Mole', cat: 'Reflex', icon: 'https://cdn-icons-png.flaticon.com/512/2619/2619077.png', key: 'mole' },
+            { id: 'g_snake', name: 'Neon Snake High', cat: 'Arcade', icon: 'https://cdn-icons-png.flaticon.com/512/528/528105.png', key: 'snake' },
+            { id: 'g_color', name: 'Color Reflex', cat: 'Mind', icon: 'https://cdn-icons-png.flaticon.com/512/3552/3552011.png', key: 'color' },
+            { id: 'g_catch', name: 'Gems Catch Ultra', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/658/658237.png', key: 'catch' },
+            { id: 'g_ttt', name: 'Tic Tac Toe Duo', cat: 'Board', icon: 'https://cdn-icons-png.flaticon.com/512/566/566294.png', key: 'ttt' },
+            { id: 'g_emoji', name: 'Emoji Pop Speed', cat: 'Reflex', icon: 'https://cdn-icons-png.flaticon.com/512/4272/4272841.png', key: 'emoji' },
+            { id: 'g_tap', name: 'Fast Tap Speed', cat: 'Action', icon: 'https://cdn-icons-png.flaticon.com/512/2618/2618245.png', key: 'tap' },
+            { id: 'g_space', name: 'Space Dodge Pro', cat: 'Arcade', icon: 'https://cdn-icons-png.flaticon.com/512/1356/1356479.png', key: 'space' },
+            { id: 'g_simon', name: 'Simon Sequence', cat: 'Memory', icon: 'https://cdn-icons-png.flaticon.com/512/3399/3399127.png', key: 'simon' },
+            { id: 'g_num', name: 'Number Slider', cat: 'Puzzle', icon: 'https://cdn-icons-png.flaticon.com/512/566/566445.png', key: 'number' }
         ];
 
         let scores = JSON.parse(localStorage.getItem('orbit_v3_scores')) || {};
@@ -185,8 +197,6 @@
             initAvatarGrid();
             checkExistingSession();
         };
-
-        // --- LOGIN LOGIC ---
 
         function initAvatarGrid() {
             const grid = document.getElementById('avatar-grid');
@@ -211,7 +221,7 @@
             const saved = localStorage.getItem('orbit_user_data');
             if(saved) {
                 currentUser = JSON.parse(saved);
-                launchApp(true); // Direct launch
+                launchApp(true);
             } else {
                 document.getElementById('login-view').classList.remove('hidden');
                 document.getElementById('login-view').classList.add('flex');
@@ -221,15 +231,9 @@
         function handleLoginSubmit() {
             const user = document.getElementById('login-user').value.trim();
             const pin = document.getElementById('login-pin').value.trim();
-
-            if (!user || !pin) {
-                alert("Arrey! Username aur PIN dono zaroori hain.");
-                return;
-            }
-
+            if (!user || !pin) { alert("Username aur PIN zaroori hai!"); return; }
             currentUser = { name: user, pin: pin, avatar: avatars[selectedAvatarIdx] };
             localStorage.setItem('orbit_user_data', JSON.stringify(currentUser));
-            
             document.getElementById('login-view').classList.add('hidden');
             document.getElementById('login-view').classList.remove('flex');
             launchApp(false);
@@ -246,7 +250,6 @@
         function launchApp(isQuick) {
             const splash = document.getElementById('splash');
             splash.classList.remove('hidden');
-            
             setTimeout(() => {
                 splash.style.opacity = '0';
                 setTimeout(() => {
@@ -257,18 +260,13 @@
             }, isQuick ? 1000 : 2000);
         }
 
-        // --- DASHBOARD CORE ---
-
         function showView(view) {
             const container = document.getElementById('view-container');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('opacity-100', 'text-blue-500'));
-            
             const activeNav = document.getElementById('nav-' + view);
             if(activeNav) activeNav.classList.add('opacity-100', 'text-blue-500');
-
             isGameOn = false;
             container.innerHTML = '';
-
             if (view === 'home') renderHome();
             else if (view === 'games') renderGames();
             else if (view === 'info') renderLegal();
@@ -277,13 +275,6 @@
         function renderHome() {
             const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
             const gamesPlayed = Object.keys(scores).length;
-            
-            let rank = "ROOKIE";
-            let rankColor = "text-slate-400";
-            if(totalScore > 500) { rank = "PRO"; rankColor = "text-blue-500"; }
-            if(totalScore > 2000) { rank = "ELITE"; rankColor = "text-purple-500"; }
-            if(totalScore > 5000) { rank = "LEGEND"; rankColor = "text-amber-500"; }
-
             const seed = new Date().getDate(); 
             const randomGame = GAMES_DB[seed % GAMES_DB.length]; 
 
@@ -292,11 +283,11 @@
                 <div class="view-anim space-y-6">
                     <div class="flex justify-between items-end">
                         <div class="space-y-1">
-                            <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.3em]">Dashboard</p>
-                            <h2 class="text-3xl font-black text-white">${currentUser?.name || 'Commander'} ${currentUser?.avatar || '👋'}</h2>
+                            <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.3em]">Welcome Back</p>
+                            <h2 class="text-3xl font-black text-white">${currentUser?.name} ${currentUser?.avatar}</h2>
                         </div>
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center border-2 border-white/10 shadow-lg shadow-blue-500/20 text-xl">
-                            ${currentUser?.avatar || '<i class="fas fa-user-astronaut text-white"></i>'}
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center border-2 border-white/10 shadow-lg text-xl">
+                            ${currentUser?.avatar}
                         </div>
                     </div>
 
@@ -304,64 +295,40 @@
                         <div class="bg-white/5 p-4 rounded-[1.5rem] border border-white/5 flex flex-col items-center justify-center">
                             <i class="fas fa-trophy text-amber-500 text-sm mb-2"></i>
                             <p class="text-lg font-black text-white">${totalScore}</p>
-                            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Score</p>
-                        </div>
-                        <div class="bg-white/5 p-4 rounded-[1.5rem] border border-white/5 flex flex-col items-center justify-center relative overflow-hidden">
-                            <div class="absolute inset-0 bg-blue-500/10 blur-xl"></div>
-                            <i class="fas fa-medal ${rankColor} text-sm mb-2 relative z-10"></i>
-                            <p class="text-sm font-black text-white relative z-10">${rank}</p>
-                            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-wider relative z-10">Rank</p>
+                            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Points</p>
                         </div>
                         <div class="bg-white/5 p-4 rounded-[1.5rem] border border-white/5 flex flex-col items-center justify-center">
                             <i class="fas fa-gamepad text-emerald-500 text-sm mb-2"></i>
                             <p class="text-lg font-black text-white">${gamesPlayed}</p>
                             <p class="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Games</p>
                         </div>
+                        <div class="bg-white/5 p-4 rounded-[1.5rem] border border-white/5 flex flex-col items-center justify-center">
+                            <i class="fas fa-code text-blue-500 text-sm mb-2"></i>
+                            <p class="text-[10px] font-black text-white">ACTIVE</p>
+                            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Status</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-indigo-900/40 to-black p-5 rounded-[2.5rem] border border-white/10 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-3xl">👨‍💻</div>
+                        <div>
+                            <p class="text-[8px] font-black text-blue-400 uppercase tracking-widest">Main Developer</p>
+                            <h3 class="text-lg font-black text-white">Siddiqui Kamal</h3>
+                            <p class="text-[10px] text-slate-400">System Architect & Lead Designer</p>
+                        </div>
                     </div>
 
                     <div class="relative overflow-hidden bg-gradient-to-r from-slate-900 to-black rounded-[2.5rem] border border-white/10 p-6 shadow-2xl">
-                        <div class="absolute top-0 right-0 p-4 opacity-10">
-                            <i class="fas fa-crosshairs text-6xl text-white"></i>
-                        </div>
                         <div class="relative z-10">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                                <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest">Daily Priority</p>
+                                <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest">Daily Quest</p>
                             </div>
-                            <h3 class="text-xl font-black text-white mb-1">Mission: ${randomGame.name}</h3>
-                            <p class="text-xs text-slate-400 mb-4">Launch protocol initiated. Set a new high score today to earn Elite status.</p>
-                            
-                            <div class="w-full bg-white/10 h-1.5 rounded-full mb-4 overflow-hidden">
-                                <div class="bg-gradient-to-r from-rose-500 to-orange-500 w-[65%] h-full rounded-full"></div>
-                            </div>
-                            
-                            <button onclick="openLauncher('${randomGame.id}')" class="bg-white text-black text-[10px] font-black px-6 py-3 rounded-xl uppercase tracking-widest active:scale-95 transition-transform">
-                                Start Mission
-                            </button>
+                            <h3 class="text-xl font-black text-white mb-1">${randomGame.name}</h3>
+                            <p class="text-xs text-slate-400 mb-4">Master this game to level up your dashboard.</p>
+                            <button onclick="openLauncher('${randomGame.id}')" class="bg-white text-black text-[10px] font-black px-6 py-3 rounded-xl uppercase tracking-widest active:scale-95 transition-transform">Start Now</button>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3 pb-6">
-                        <button onclick="showView('games')" class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-3xl flex items-center gap-3 active:scale-95 transition-all">
-                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-                                <i class="fas fa-rocket"></i>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-white font-bold text-xs">Arcade</p>
-                                <p class="text-[9px] text-blue-400">Launch</p>
-                            </div>
-                        </button>
-                        <button onclick="showView('info')" class="bg-white/5 border border-white/10 p-4 rounded-3xl flex items-center gap-3 active:scale-95 transition-all">
-                            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
-                                <i class="fas fa-cog"></i>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-white font-bold text-xs">Settings</p>
-                                <p class="text-[9px] text-slate-500">System</p>
-                            </div>
-                        </button>
-                    </div>
-
                 </div>`;
         }
 
@@ -369,7 +336,7 @@
             const container = document.getElementById('view-container');
             container.innerHTML = `
                 <div class="view-anim space-y-6">
-                    <h2 class="text-2xl font-black text-white">Arcade Masterlist</h2>
+                    <h2 class="text-2xl font-black text-white">Arcade Hub</h2>
                     <div class="grid grid-cols-2 gap-4">
                         ${GAMES_DB.map(app => `
                             <div onclick="openLauncher('${app.id}')" class="bg-white/5 p-5 rounded-[2.5rem] border border-white/5 text-center active:scale-95 transition-all">
@@ -386,31 +353,41 @@
             const container = document.getElementById('view-container');
             container.innerHTML = `
                 <div class="view-anim space-y-6 pb-10">
-                    <h2 class="text-2xl font-black text-white">Information Center</h2>
+                    <h2 class="text-2xl font-black text-white">System Information</h2>
                     
-                    <div class="legal-card">
-                        <div class="flex items-center gap-3 mb-3 text-rose-500">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <h3 class="font-black text-xs uppercase tracking-widest">Account Session</h3>
+                    <div class="legal-card bg-gradient-to-tr from-blue-600/10 to-transparent border-blue-500/20">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-16 h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-3xl shadow-lg shadow-blue-600/30 text-white">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-xl text-white">Siddiqui Kamal</h3>
+                                <p class="text-xs text-blue-400 font-bold uppercase tracking-widest">Full-Stack Developer</p>
+                            </div>
                         </div>
-                        <p class="text-[11px] text-slate-400 leading-relaxed mb-4">Logged in as <b>${currentUser?.name}</b>. Logout to switch profiles or reset your PIN.</p>
-                        <button onclick="handleLogout()" class="w-full text-xs font-bold text-white bg-rose-600/20 px-4 py-3 rounded-xl border border-rose-500/30 block text-center uppercase tracking-widest">Logout System</button>
+                        <p class="text-[11px] text-slate-400 leading-relaxed italic mb-4">"Building seamless digital experiences with passion and precision. AppOrbit is a reflection of modern performance and UI design."</p>
+                        <div class="flex gap-2">
+                            <span class="bg-white/5 px-3 py-1 rounded-full text-[9px] font-bold text-slate-300">JavaScript</span>
+                            <span class="bg-white/5 px-3 py-1 rounded-full text-[9px] font-bold text-slate-300">UI/UX</span>
+                            <span class="bg-white/5 px-3 py-1 rounded-full text-[9px] font-bold text-slate-300">Logic Design</span>
+                        </div>
                     </div>
 
                     <div class="legal-card">
-                        <div class="flex items-center gap-3 mb-3 text-blue-500">
-                            <i class="fas fa-building"></i>
-                            <h3 class="font-black text-xs uppercase tracking-widest">About Us</h3>
+                        <div class="flex items-center gap-3 mb-3 text-rose-500">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <h3 class="font-black text-xs uppercase tracking-widest">Account</h3>
                         </div>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">AppOrbit is a high-performance gaming ecosystem designed for enthusiasts. Version 3.1 is optimized for low-latency and maximum fun.</p>
+                        <p class="text-[11px] text-slate-400 mb-4">Logged in as <b>${currentUser?.name}</b>.</p>
+                        <button onclick="handleLogout()" class="w-full text-xs font-bold text-white bg-rose-600/20 px-4 py-3 rounded-xl border border-rose-500/30 block text-center uppercase tracking-widest">Logout</button>
                     </div>
 
                     <div class="legal-card">
                         <div class="flex items-center gap-3 mb-3 text-purple-500">
-                            <i class="fas fa-user-shield"></i>
-                            <h3 class="font-black text-xs uppercase tracking-widest">Privacy Policy</h3>
+                            <i class="fas fa-shield-alt"></i>
+                            <h3 class="font-black text-xs uppercase tracking-widest">Privacy</h3>
                         </div>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">Your data is stored <b>locally</b> on this device (localStorage). No data is sent to external servers.</p>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">System v3.1 is localized. No data leaves this device.</p>
                     </div>
                 </div>`;
         }
@@ -421,7 +398,7 @@
             const container = document.getElementById('view-container');
             container.innerHTML = `
                 <div class="view-anim space-y-4">
-                    <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Search Results (${filtered.length})</h2>
+                    <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Results (${filtered.length})</h2>
                     <div class="grid grid-cols-1 gap-3">
                         ${filtered.map(app => `
                             <div onclick="openLauncher('${app.id}')" class="flex items-center gap-4 p-4 bg-white/5 rounded-[2rem] border border-white/5">
@@ -433,8 +410,6 @@
                 </div>`;
         }
 
-        // --- GAME SYSTEM ---
-        
         function openLauncher(id) {
             const app = GAMES_DB.find(a => a.id === id);
             const container = document.getElementById('view-container');
@@ -445,15 +420,14 @@
                         <button onclick="showView('games')" class="absolute top-10 left-10 text-slate-500"><i class="fas fa-chevron-left text-xl"></i></button>
                         <img src="${app.icon}" class="w-28 h-28 mx-auto mb-10 bg-white/5 rounded-[2.5rem] p-4 shadow-xl border border-white/10">
                         <h2 class="text-3xl font-black text-white">${app.name}</h2>
-                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mt-3">Ready to Launch</p>
                         <div class="flex gap-4 mt-12 mb-12">
                             <div class="flex-1 bg-black p-4 rounded-3xl border border-white/5">
-                                <p class="text-[8px] font-black text-slate-500 uppercase">Best Score</p>
+                                <p class="text-[8px] font-black text-slate-500 uppercase">Best</p>
                                 <p class="text-lg font-black text-white mt-1">${scores[app.key] || 0}</p>
                             </div>
                             <div class="flex-1 bg-black p-4 rounded-3xl border border-white/5">
-                                <p class="text-[8px] font-black text-slate-500 uppercase">Level</p>
-                                <p class="text-lg font-black text-blue-500 mt-1 uppercase">MAX</p>
+                                <p class="text-[8px] font-black text-slate-500 uppercase">Status</p>
+                                <p class="text-lg font-black text-blue-500 mt-1 uppercase">HQ</p>
                             </div>
                         </div>
                         <button onclick="startGame('${app.key}')" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all tracking-[0.2em] text-xs uppercase">START MISSION</button>
@@ -463,7 +437,8 @@
 
         function startGame(key) {
             isGameOn = true;
-            if(key === 'math') initMath();
+            if(key === 'water') initWaterSort();
+            else if(key === 'math') initMath();
             else if(key === 'memory') initMemory();
             else if(key === '2048') init2048();
             else if(key === 'mole') initMole();
@@ -495,12 +470,12 @@
                 card.className = "rounded-[3.5rem] p-10 text-center shadow-2xl max-w-xs w-full view-anim border border-white/10 win-bg";
                 iconBox.className = "w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl";
                 icon.className = "fas fa-trophy text-4xl text-white";
-                title.innerText = "You Won!";
+                title.innerText = "Success!";
             } else {
                 card.className = "rounded-[3.5rem] p-10 text-center shadow-2xl max-w-xs w-full view-anim border border-white/10 lose-bg";
                 iconBox.className = "w-24 h-24 bg-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl";
                 icon.className = "fas fa-skull text-4xl text-white";
-                title.innerText = "Game Over";
+                title.innerText = "Failed";
             }
 
             message.innerText = msg + (score !== null ? ` \nScore: ${score}` : "");
@@ -518,8 +493,80 @@
             showView('games');
         }
 
-        // --- GAME ENGINES (MATH, MEMORY, ETC) ---
+        /* --- WATER SORT ENGINE --- */
+        let wBottles = [], wSelected = null, wMoves = 0, wTime = 60;
+        const W_COLORS = ['#ff4b2b', '#00d2ff', '#11998e', '#f9d423', '#8e2de2'];
 
+        function initWaterSort() {
+            wMoves = 0; wSelected = null; wTime = 60;
+            const container = document.getElementById('view-container');
+            container.innerHTML = `
+                <div class="view-anim">
+                    <div class="w-hud">
+                        <div class="text-center"><p class="text-[8px] text-slate-500 uppercase font-black">Time</p><p id="w-timer" class="text-blue-500 font-black">60</p></div>
+                        <div class="text-center"><p class="text-[8px] text-slate-500 uppercase font-black">Moves</p><p id="w-moves" class="text-white font-black">0</p></div>
+                        <button onclick="showView('games')" class="text-slate-500"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div id="water-stage"></div>
+                </div>`;
+            
+            let pool = [];
+            W_COLORS.forEach(c => { for(let i=0; i<4; i++) pool.push(c); });
+            pool.sort(() => Math.random() - 0.5);
+            wBottles = [];
+            for(let i=0; i<5; i++) wBottles.push(pool.slice(i*4, (i+1)*4));
+            wBottles.push([]); wBottles.push([]); // 2 Empty bottles
+
+            renderWater();
+            const timer = setInterval(() => {
+                if(!isGameOn) { clearInterval(timer); return; }
+                wTime--; document.getElementById('w-timer').innerText = wTime;
+                if(wTime <= 0) { clearInterval(timer); showResult(wMoves, false, "Time Up!"); }
+            }, 1000);
+        }
+
+        function renderWater() {
+            const stage = document.getElementById('water-stage');
+            stage.innerHTML = '';
+            wBottles.forEach((b, i) => {
+                const div = document.createElement('div');
+                div.className = `bottle ${wSelected === i ? 'selected' : ''}`;
+                div.onclick = () => handleWaterClick(i);
+                b.forEach(color => {
+                    const l = document.createElement('div');
+                    l.className = 'liquid'; l.style.backgroundColor = color;
+                    div.appendChild(l);
+                });
+                stage.appendChild(div);
+            });
+        }
+
+        function handleWaterClick(i) {
+            if(!isGameOn) return;
+            if (wSelected === null) {
+                if (wBottles[i].length > 0) { wSelected = i; renderWater(); }
+            } else {
+                if (wSelected !== i) {
+                    const from = wBottles[wSelected];
+                    const to = wBottles[i];
+                    if (to.length < 4 && (to.length === 0 || to[to.length-1] === from[from.length-1])) {
+                        const color = from[from.length-1];
+                        while(from.length > 0 && from[from.length-1] === color && to.length < 4) {
+                            to.push(from.pop());
+                        }
+                        wMoves++; document.getElementById('w-moves').innerText = wMoves;
+                    }
+                }
+                wSelected = null; renderWater(); checkWaterWin();
+            }
+        }
+
+        function checkWaterWin() {
+            const win = wBottles.every(b => b.length === 0 || (b.length === 4 && b.every(c => c === b[0])));
+            if (win) showResult(wMoves, true, "Sorted Successfully!");
+        }
+
+        /* --- REST OF THE ORIGINAL GAMES --- */
         function initMath() {
             let score = 0, lives = 3, q;
             const container = document.getElementById('view-container');
@@ -793,5 +840,3 @@
     </script>
 </body>
 </html>
-
-
