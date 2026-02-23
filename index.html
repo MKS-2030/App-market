@@ -838,5 +838,285 @@
             render();
         }
     </script>
+
+<!-- ============================= -->
+<!-- 🔊 AppOrbit v3.2 SOUND FIXED -->
+<!-- Built-in Sound + Haptic -->
+<!-- ============================= -->
+
+<style>
+button{
+transition:.3s;
+}
+button:hover{
+box-shadow:0 0 20px #00bfff;
+transform:scale(1.05);
+}
+
+/* Particles */
+.real-particle{
+position:fixed;
+width:5px;
+height:5px;
+background:#00bfff;
+border-radius:50%;
+opacity:.6;
+animation:floatUp linear infinite;
+z-index:-2;
+}
+@keyframes floatUp{
+0%{transform:translateY(100vh);opacity:0}
+50%{opacity:1}
+100%{transform:translateY(-10vh);opacity:0}
+}
+</style>
+
+<script>
+/* ===== Built-in Sound System (No MP3 Needed) ===== */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playBeep(freq, duration){
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.type = "sine";
+  oscillator.frequency.value = freq;
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.start();
+
+  gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+  oscillator.stop(audioCtx.currentTime + duration);
+}
+
+/* Click Sound */
+function clickSound(){
+  playBeep(500, 0.1);
+  if(navigator.vibrate) navigator.vibrate(20);
+}
+
+/* Win Sound */
+window.appWin = function(){
+  playBeep(800,0.15);
+  setTimeout(()=>playBeep(1000,0.2),150);
+  if(navigator.vibrate) navigator.vibrate([120,50,120]);
+  showToast("🎉 You Won!");
+}
+
+/* Lose Sound */
+window.appLose = function(){
+  playBeep(200,0.3);
+  if(navigator.vibrate) navigator.vibrate(300);
+  showToast("😔 Game Over!");
+}
+
+/* Global Click */
+document.addEventListener("click",function(e){
+  if(e.target.closest("button")){
+    clickSound();
+  }
+});
+
+/* Toast */
+function showToast(msg){
+  let toast=document.createElement("div");
+  toast.innerText=msg;
+  toast.style.cssText="position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 20px;border-radius:10px;box-shadow:0 0 15px #00bfff;z-index:9999;";
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2000);
+}
+
+/* Particles */
+for(let i=0;i<40;i++){
+  const p=document.createElement("div");
+  p.className="real-particle";
+  p.style.left=Math.random()*100+"%";
+  p.style.animationDuration=(5+Math.random()*8)+"s";
+  document.body.appendChild(p);
+}
+</script>
+
+<!-- ============================= -->
+<!-- END SOUND FIXED VERSION -->
+<!-- ============================= -->
+
+
+<!-- ============================= -->
+<!-- 🌆 CYBERPUNK / SYNTHWAVE BACKGROUND -->
+<!-- ============================= -->
+<style>
+body{
+  background: radial-gradient(circle at 50% 80%, #ff00cc 0%, #1a0026 40%, #000000 80%);
+  overflow-x:hidden;
+}
+
+/* Neon Grid Floor */
+.cyber-grid{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:50%;
+  background:
+    linear-gradient(to right, rgba(0,255,255,.3) 1px, transparent 1px),
+    linear-gradient(to top, rgba(0,255,255,.3) 1px, transparent 1px);
+  background-size:40px 40px;
+  transform:perspective(500px) rotateX(60deg);
+  transform-origin:bottom;
+  animation:gridMove 6s linear infinite;
+  z-index:-1;
+}
+
+@keyframes gridMove{
+  from{background-position:0 0, 0 0;}
+  to{background-position:0 40px, 40px 0;}
+}
+
+/* Neon Glow Pulse */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center, rgba(0,255,255,.2), transparent 70%);
+  animation:neonPulse 4s infinite;
+  z-index:-2;
+}
+
+@keyframes neonPulse{
+  0%,100%{opacity:.4}
+  50%{opacity:1}
+}
+</style>
+
+<div class="cyber-grid"></div>
+<!-- ============================= -->
+<!-- END CYBERPUNK BACKGROUND -->
+<!-- ============================= -->
+
+
+<!-- ============================= -->
+<!-- 🎵 REAL SYNTHWAVE BACKGROUND MUSIC -->
+<!-- ============================= -->
+<script>
+let bgStarted = false;
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+const bgCtx = new AudioContextClass();
+
+function startSynthwaveBG(){
+  if(bgStarted) return;
+  bgStarted = true;
+
+  const masterGain = bgCtx.createGain();
+  masterGain.gain.value = 0.05;
+  masterGain.connect(bgCtx.destination);
+
+  function createPad(freq){
+    const osc = bgCtx.createOscillator();
+    const gain = bgCtx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.value = freq;
+
+    gain.gain.value = 0.2;
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start();
+  }
+
+  // Chill Synthwave chord loop
+  createPad(110);  // A2
+  createPad(220);  // A3
+  createPad(277);  // C#
+  createPad(330);  // E
+
+  console.log("Synthwave Background Started");
+}
+
+// Start on first user interaction (browser policy)
+document.addEventListener("click", function(){
+  if(bgCtx.state === "suspended"){
+    bgCtx.resume();
+  }
+  startSynthwaveBG();
+});
+</script>
+<!-- ============================= -->
+<!-- END SYNTHWAVE MUSIC -->
+<!-- ============================= -->
+
+
+<!-- ============================= -->
+<!-- 🎶 ULTRA DYNAMIC SYNTHWAVE MUSIC -->
+<!-- ============================= -->
+<script>
+let ultraStarted = false;
+const UltraAudioContext = window.AudioContext || window.webkitAudioContext;
+const ultraCtx = new UltraAudioContext();
+
+function playNote(freq, time, duration, type="sawtooth"){
+  const osc = ultraCtx.createOscillator();
+  const gain = ultraCtx.createGain();
+  
+  osc.type = type;
+  osc.frequency.value = freq;
+
+  gain.gain.setValueAtTime(0.001, time);
+  gain.gain.exponentialRampToValueAtTime(0.08, time + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+  osc.connect(gain);
+  gain.connect(ultraCtx.destination);
+
+  osc.start(time);
+  osc.stop(time + duration);
+}
+
+function startUltraMusic(){
+  if(ultraStarted) return;
+  ultraStarted = true;
+
+  const tempo = 90;
+  const beat = 60 / tempo;
+  let currentTime = ultraCtx.currentTime;
+
+  const bassLine = [110, 110, 130, 98];
+  const melody = [440, 494, 523, 494, 659, 587, 523, 494];
+
+  setInterval(()=>{
+    if(ultraCtx.state === "suspended"){
+      ultraCtx.resume();
+    }
+
+    let t = ultraCtx.currentTime;
+
+    // Bass
+    bassLine.forEach((freq, i)=>{
+      playNote(freq, t + i*beat, beat*0.9, "square");
+    });
+
+    // Melody (random variation)
+    melody.forEach((freq, i)=>{
+      let variation = Math.random() * 20 - 10;
+      playNote(freq + variation, t + i*(beat/2), beat*0.4, "sawtooth");
+    });
+
+  }, beat * 4000);
+}
+
+// Start on first interaction
+document.addEventListener("click", function(){
+  startUltraMusic();
+});
+
+</script>
+<!-- ============================= -->
+<!-- END ULTRA MUSIC -->
+<!-- ============================= -->
+
 </body>
 </html>
